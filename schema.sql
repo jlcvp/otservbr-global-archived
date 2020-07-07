@@ -1703,10 +1703,7 @@ INSERT INTO `players` (`id`, `name`, `group_id`, `account_id`, `level`, `vocatio
 --
 
 CREATE TABLE `players_online` (
-	`player_id` int(11) NOT NULL,
-	`cast_on` tinyint(1) NOT NULL DEFAULT 0,
-	`cast_password` varchar(40) DEFAULT NULL,
-	`cast_spectators` int(5) NOT NULL DEFAULT 0
+	`player_id` int(11) NOT NULL
 ) ENGINE=MEMORY DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
