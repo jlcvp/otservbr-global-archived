@@ -1,6 +1,7 @@
 dist: bionic
 language: cpp
-matrix:
+os: linux
+jobs:
   include:
     - dist: bionic
       env:
@@ -36,7 +37,7 @@ matrix:
 
 
 
-compilers:
+compiler:
   - gcc
   # - clang
 
@@ -55,7 +56,6 @@ addons:
       - libluajit-5.1-dev
       - libmysqlclient-dev
       - libpugixml-dev
-      - libgmp3-dev
       - ccache
 
 before_script:

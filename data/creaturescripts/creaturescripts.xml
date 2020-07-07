@@ -28,7 +28,7 @@
 	<event type="death" name="BossDeath" script="others/boss_reward_chest.lua"/>
 	<event type="healthchange" name="BossParticipation" script="others/boss_reward_chest.lua"/>
 	<event type="think" name="BossThink" script="others/boss_reward_chest.lua"/>
-	<event type="death" name="Droploot" script="others/droploot.lua"/>
+	<event type="death" name="DropLoot" script="others/droploot.lua"/>
 	<event type="login" name="PlayerLogin" script="others/login.lua"/>
 	<event type="login" name="LoginEvents" script="others/login_events.lua"/>
 	<event type="logout" name="PlayerLogout" script="others/logout.lua"/>
@@ -42,6 +42,8 @@
 	<event type="login" name="SummonLogin" script="others/summon.lua"/>
 	<event type="think" name="SummonThink" script="others/summon.lua"/>
 	<event type="death" name="SummonDeath" script="others/summon.lua"/>
+	<!-- Hirelings -->
+	<event type="logout" name="HirelingLogoutPlayer" script="others/hireling_logout.lua" />
 
 	<!-- quests -->
 	<!-- adventurers_guild -->
@@ -146,18 +148,13 @@
 	<event type="kill" name="DiseasedTrio" script="quests/in_service_of_yalahar/diseased_trio_kill.lua"/>
 	<event type="kill" name="QuaraLeaders" script="quests/in_service_of_yalahar/quara_leader_kill.lua"/>
 	<!-- inquisition_quest -->
-	<event type="kill" name="IquisitionBossKill" script="quests/inquisition/inquisition_boss.lua"/>
+	<event type="kill" name="InquisitionBossKill" script="quests/inquisition/inquisition_boss.lua"/>
 	<event type="kill" name="UngreezKill" script="quests/inquisition/inquisition_ungreez.lua"/>
 	<!-- killing in the name of... -->
 	<event type="kill" name="KillingInTheNameOfKill" script="quests/killing_in_the_name_of/kill.lua"/>
 	<event type="kill" name="KillingInTheNameOfMinotaurKill" script="quests/killing_in_the_name_of/minotaur_kill.lua"/>
 	<!-- liquid black -->
 	<event type="kill" name="DeeplingBosses" script="quests/liquid_black/deepling_boss_kill.lua"/>
-	<!-- oramond quest -->
-	<event type="think" name="CanopicJar" script="quests/oramond/canopic_jar.lua"/>
-	<event type="death" name="TheRavagerDeath" script="quests/oramond/the_ravager_death.lua"/>
-	<event type="death" name="DeathShargonPriestDeath" script="quests/oramond/death_shargon_priest_death.lua"/>
-	<event type="think" name="TheRavagerHeal" script="quests/oramond/the_ravager_heal.lua"/>
 	<!-- raging mage tower worldchange -->
 	<event type="kill" name="EnergizedRagingMageKill" script="quests/raging_mage_tower/energized_raging_mage_kill.lua"/>
 	<event type="kill" name="ragingMageKill" script="quests/raging_mage_tower/raging_mage_kill.lua"/>

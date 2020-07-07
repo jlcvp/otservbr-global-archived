@@ -53,6 +53,10 @@ local carpetItems = {
 	[29389] = 29388, --crested carpet
 	[29390] = 29391, --decorated carpet
 	[29391] = 29390, --decorated carpet
+	[36301] = 36303, --tournament carpet
+	[36303] = 36301, --tournament carpet
+	[36302] = 36304, --sublime tournament carpet
+	[36304] = 36302, --sublime tournament carpet
 }
 
 local carpets = Action()
@@ -68,7 +72,7 @@ function carpets.onUse(player, item, fp, target, toPosition, isHotkey)
 	if not fromPosition:getTile():getHouse() then
 		player:sendTextMessage(MESSAGE_STATUS_SMALL, "You may use this only inside a house.")
 	elseif tile:getItemCountById(item.itemid) == 1 then
-		for k,v in pairs(foldedCarpet) do
+		for k,v in pairs(carpetItems) do
 			if tile:getItemCountById(k) > 0 and k ~= item.itemid then
 				player:sendCancelMessage(Game.getReturnMessage(RETURNVALUE_NOTPOSSIBLE))
 				return true

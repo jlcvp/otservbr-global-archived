@@ -63,7 +63,7 @@ local config = {
 		items = {
 			{itemId = 4855}
 		},
-		storage = Storage.ExplorerSociety.TheElvenPoetry,
+		storage = Storage.ExplorerSociety.ElvenDoor,
 		formerValue = 36,
 		newValue = 37
 	},
@@ -95,7 +95,7 @@ local config = {
 		items = {
 			{itemId = 2332}
 		},
-		storage = Storage.postman.Mission08,
+		storage = Storage.Postman.Mission08,
 		formerValue = 1,
 		newValue = 2
 	},
@@ -168,7 +168,7 @@ local config = {
 		items = {
 			{itemId = 2330}
 		},
-		storage = Storage.postman.Mission09,
+		storage = Storage.Postman.Mission09,
 		formerValue = 1,
 		newValue = 2
 	},
@@ -176,7 +176,7 @@ local config = {
 		items = {
 			{itemId = 2331}
 		},
-		storage = Storage.postman.Mission05,
+		storage = Storage.Postman.Mission05,
 		formerValue = 1,
 		newValue = 2
 	},
@@ -246,20 +246,20 @@ local config = {
 		formerValue = 2,
 		newValue = 3
 	},
-	[12125] = {
+	[9255] = {
 		items = {
 			{itemId = 4850}
 		},
 		storage = Storage.HydraEggQuest
 	},
-	[12126] = {
+	[9256] = {
 		items = {
 			{itemId = 4840, decay = true}
 		},
 		storage = Storage.TheApeCity.WitchesCapSpot,
 		time = true
 	},
-	[12331] = {
+	[9259] = {
 		items = {
 			{itemId = 11076}
 		},
@@ -268,20 +268,20 @@ local config = {
 		newValue = 2,
 		say = 'You dig out a skull from the pile of bones. That must be the skull Lazaran talked about.'
 	},
-	[12507] = {
+	[9266] = {
 		items = {
 			{itemId = 8766}
 		},
-		storage = Storage.thievesGuild.Mission06,
+		storage = Storage.ThievesGuild.Mission06,
 		formerValue = 2,
 		newValue = 3,
 		say = 'To buy some time you replace the fish with a piece of carrot.'
 	},
-	[12578] = {
+	[9277] = {
 		items = {
 			{itemId = 7736}
 		},
-		storage = Storage.secretService.RottenTree
+		storage = Storage.SecretService.RottenTree
 	},
 	[50032] = {
 		items = {
@@ -293,13 +293,13 @@ local config = {
 		items = {
 			{itemId = 2789, count = 10}
 		},
-		storage = Storage.hiddenCityOfBeregar.BrownMushrooms
+		storage = Storage.HiddenCityOfBeregar.BrownMushrooms
 	},
 	[50125] = {
 		items = {
 			{itemId = 14348}
 		},
-		storage = Storage.hiddenCityOfBeregar.JusticeForAll,
+		storage = Storage.HiddenCityOfBeregar.JusticeForAll,
 		formerValue = 3,
 		newValue = 4
 	},
@@ -362,6 +362,18 @@ local config = {
 			{itemId = 2260, count = 3}
 		},
 		storage = 857448
+	},
+	[65211] = {
+		items = {
+			{itemId = 2145, count = 1}
+		},
+		storage = 857449
+	},
+	[65212] = {
+		items = {
+			{itemId = 2088, actionId = 3667}
+		},
+		storage = 857450
 	},
 	-- 65203 reservado
 }
