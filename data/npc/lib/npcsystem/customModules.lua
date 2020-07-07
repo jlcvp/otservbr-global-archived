@@ -202,8 +202,8 @@ function VoiceModule:init(handler)
 end
 
 function VoiceModule:callbackOnThink()
-	if self.lastVoice < os.time() then
-		self.lastVoice = os.time() + self.timeout
+	if self.lastVoice < os.stime() then
+		self.lastVoice = os.stime() + self.timeout
 		if math.random(100) < self.chance  then
 			local voice = self.voices[math.random(self.voiceCount)]
 			Npc():say(voice.text, voice.talktype)
@@ -213,45 +213,25 @@ function VoiceModule:callbackOnThink()
 end
 
 function Player.removeMoneyNpc(self, amount)
-
 	if type(amount) == 'string' then
 		amount = tonumber(amount)
 	end
-
 	local moneyCount = self:getMoney()
 	local bankCount = self:getBankBalance()
-
-	-- The player have all the money with him
-	if amount <= moneyCount then
-		-- Removes player inventory money
-		self:removeMoney(amount)
-
-		self:sendTextMessage(MESSAGE_INFO_DESCR, ("Paid %d from inventory."):format(amount))
-		return true
-
-	-- The player doens't have all the money with him
-	elseif amount <= (moneyCount + bankCount) then
-
-		-- Check if the player has some money
-		if moneyCount ~= 0 then
-			-- Removes player inventory money
-			self:removeMoney(moneyCount)
-			local remains = amount - moneyCount
-
-			-- Removes player bank money
-			self:setBankBalance(bankCount - remains)
-
-			self:sendTextMessage(MESSAGE_INFO_DESCR, ("Paid %d from inventory and %d gold from bank account. Your account balance is now %d gold."):format(moneyCount, amount - moneyCount, self:getBankBalance()))
-			return true
-
-		else
-			self:setBankBalance(bankCount - amount)
-			self:sendTextMessage(MESSAGE_INFO_DESCR, ("Paid %d gold from bank account. Your account balance is now %d gold."):format(amount, self:getBankBalance()))
-			return true
-		end
+	if amount > moneyCount + bankCount then
+		return false
 	end
 
-	return false
+	self:removeMoney(math.min(amount, moneyCount))
+	if amount > moneyCount then
+		self:setBankBalance(bankCount - math.max(amount - moneyCount, 0))
+		if moneyCount == 0 then
+			self:sendTextMessage(MESSAGE_INFO_DESCR, ("Paid %d gold from bank account. Your account balance is now %d gold."):format(amount, self:getBankBalance()))
+		else
+			self:sendTextMessage(MESSAGE_INFO_DESCR, ("Paid %d from inventory and %d gold from bank account. Your account balance is now %d gold."):format(moneyCount, amount - moneyCount, self:getBankBalance()))
+		end
+	end
+	return true
 end
 
 local function getPlayerMoney(cid)

@@ -23,11 +23,6 @@ registerMonsterType.experience = function(mtype, mask)
 		mtype:experience(mask.experience)
 	end
 end
-registerMonsterType.skull = function(mtype, mask)
-	if mask.skull then
-		mtype:skull(mask.skull)
-	end
-end
 registerMonsterType.outfit = function(mtype, mask)
 	if mask.outfit then
 		mtype:outfit(mask.outfit)
@@ -75,25 +70,25 @@ registerMonsterType.corpse = function(mtype, mask)
 end
 registerMonsterType.flags = function(mtype, mask)
 	if mask.flags then
-		if mask.flags.attackable ~= nil then
+		if mask.flags.attackable then
 			mtype:isAttackable(mask.flags.attackable)
 		end
-		if mask.flags.healthHidden ~= nil then
+		if mask.flags.healthHidden then
 			mtype:isHealthHidden(mask.flags.healthHidden)
 		end
-		if mask.flags.convinceable ~= nil then
+		if mask.flags.convinceable then
 			mtype:isConvinceable(mask.flags.convinceable)
 		end
-		if mask.flags.illusionable ~= nil then
+		if mask.flags.illusionable then
 			mtype:isIllusionable(mask.flags.illusionable)
 		end
-		if mask.flags.hostile ~= nil then
+		if mask.flags.hostile then
 			mtype:isHostile(mask.flags.hostile)
 		end
-		if mask.flags.pushable ~= nil then
+		if mask.flags.pushable then
 			mtype:isPushable(mask.flags.pushable)
 		end
-		if mask.flags.canPushItems ~= nil then
+		if mask.flags.canPushItems then
 			mtype:canPushItems(mask.flags.canPushItems)
 		end
 		if mask.flags.rewardboss then
@@ -111,7 +106,7 @@ registerMonsterType.flags = function(mtype, mask)
 		if mask.flags.respawntype then
 			mtype:respawnType(mask.flags.respawntype)
 		end
-		if mask.flags.canPushCreatures ~= nil then
+		if mask.flags.canPushCreatures then
 			mtype:canPushCreatures(mask.flags.canPushCreatures)
 		end
 		if mask.flags.targetDistance then
@@ -142,9 +137,23 @@ registerMonsterType.changeTarget = function(mtype, mask)
 		end
 	end
 end
+registerMonsterType.immunityDamage = function(mtype, mask)
+	if mask.immunityDamage then
+		if mask.immunityDamage then
+			mtype:combatImmunities(mask.immunityDamage)
+		end
+	end
+end
+registerMonsterType.immunityCondition = function(mtype, mask)
+	if mask.immunityCondition then
+		if mask.immunityCondition then
+			mtype:conditionImmunities(mask.immunityCondition)
+		end
+	end
+end
 registerMonsterType.voices = function(mtype, mask)
 	if type(mask.voices) == "table" then
-		local interval, chance
+		local interval; local chance;
 		if mask.voices.interval then
 			interval = mask.voices.interval
 		end
@@ -195,6 +204,12 @@ registerMonsterType.loot = function(mtype, mask)
 			if loot.text or loot.description then
 				parent:setDescription(loot.text or loot.description)
 			end
+			if loot.unique then
+				loot:setUnique(loot.unique)
+			end
+			if loot.raid then
+				loot:setRaid(loot.raid)
+			end
 			if loot.child then
 				for _, children in pairs(loot.child) do
 					local child = Loot()
@@ -215,6 +230,12 @@ registerMonsterType.loot = function(mtype, mask)
 					end
 					if children.text or children.description then
 						child:setDescription(children.text or children.description)
+					end
+					if children.unique then
+						child:setUnique(children.unique)
+					end
+					if children.raid then
+						child:setRaid(children.raid)
 					end
 					parent:addChildLoot(child)
 				end

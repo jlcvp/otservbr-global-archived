@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{A10F9657-129F-0FEF-14CB-CEE0B0E5AA3E}</ProjectGuid>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -69,21 +69,15 @@
     <Import Project="release.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <TargetName>$(ProjectName)-$(Platform)</TargetName>
-    <IncludePath>$(VcpkgRoot)include\luajit;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <TargetName>$(ProjectName)-$(Platform)</TargetName>
-    <IncludePath>$(VcpkgRoot)include\luajit;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <TargetName>$(ProjectName)-$(Platform)</TargetName>
-    <IncludePath>$(VcpkgRoot)include\luajit;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>C:\local\boost_1_66_0;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\local\boost_1_66_0\lib64-msvc-14.1;C:\local\boost_1_66_0\boost;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TargetName>$(ProjectName)-$(Platform)</TargetName>
-    <IncludePath>$(VcpkgRoot)include\luajit;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>C:\local\tfs-sdk-3.2;C:\local\boost_1_66_0;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\local\tfs-sdk-3.2;C:\local\boost_1_66_0\boost;C:\local\boost_1_66_0\lib64-msvc-14.1;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -142,7 +136,9 @@
     <ClCompile Include="..\src\ban.cpp" />
     <ClCompile Include="..\src\baseevents.cpp" />
     <ClCompile Include="..\src\bed.cpp" />
+    <ClCompile Include="..\src\bestiary.cpp" />
     <ClCompile Include="..\src\chat.cpp" />
+    <ClCompile Include="..\src\charm.cpp" />
     <ClCompile Include="..\src\combat.cpp" />
     <ClCompile Include="..\src\condition.cpp" />
     <ClCompile Include="..\src\configmanager.cpp" />
@@ -159,7 +155,6 @@
     <ClCompile Include="..\src\events.cpp" />
     <ClCompile Include="..\src\fileloader.cpp" />
     <ClCompile Include="..\src\game.cpp" />
-    <ClCompile Include="..\src\gamestore.cpp" />
     <ClCompile Include="..\src\globalevent.cpp" />
     <ClCompile Include="..\src\groups.cpp" />
     <ClCompile Include="..\src\guild.cpp" />
@@ -175,13 +170,6 @@
     <ClCompile Include="..\src\item.cpp" />
     <ClCompile Include="..\src\items.cpp" />
     <ClCompile Include="..\src\luascript.cpp" />
-    <ClCompile Include="..\src\loguru.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeaderFile>loguru.h</PrecompiledHeaderFile>
-    </ClCompile>
     <ClCompile Include="..\src\mailbox.cpp" />
     <ClCompile Include="..\src\map.cpp" />
     <ClCompile Include="..\src\modules.cpp" />
@@ -204,10 +192,16 @@
     <ClCompile Include="..\src\party.cpp" />
     <ClCompile Include="..\src\player.cpp" />
     <ClCompile Include="..\src\position.cpp" />
+    <ClCompile Include="..\src\prey.cpp" />
     <ClCompile Include="..\src\protocol.cpp" />
+    <ClCompile Include="..\src\protocolcheck.cpp" />
     <ClCompile Include="..\src\protocolgame.cpp" />
+    <ClCompile Include="..\src\protocolgamebase.cpp" />
     <ClCompile Include="..\src\protocollogin.cpp" />
+    <ClCompile Include="..\src\protocolold.cpp" />
+    <ClCompile Include="..\src\protocolspectator.cpp" />
     <ClCompile Include="..\src\protocolstatus.cpp" />
+    <ClCompile Include="..\src\quests.cpp" />
     <ClCompile Include="..\src\raids.cpp" />
     <ClCompile Include="..\src\reward.cpp" />
     <ClCompile Include="..\src\rewardchest.cpp" />
@@ -217,8 +211,10 @@
     <ClCompile Include="..\src\scriptmanager.cpp" />
     <ClCompile Include="..\src\server.cpp" />
     <ClCompile Include="..\src\signals.cpp" />
+    <ClCompile Include="..\src\site.cpp" />
     <ClCompile Include="..\src\spawn.cpp" />
     <ClCompile Include="..\src\spells.cpp" />
+    <ClCompile Include="..\src\store.cpp" />
     <ClCompile Include="..\src\talkaction.cpp" />
     <ClCompile Include="..\src\tasks.cpp" />
     <ClCompile Include="..\src\teleport.cpp" />
@@ -230,7 +226,6 @@
     <ClCompile Include="..\src\waitlist.cpp" />
     <ClCompile Include="..\src\weapons.cpp" />
     <ClCompile Include="..\src\wildcardtree.cpp" />
-    <ClCompile Include="..\src\xtea.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="otservbr-global.rc" />
@@ -241,7 +236,9 @@
     <ClInclude Include="..\src\ban.h" />
     <ClInclude Include="..\src\baseevents.h" />
     <ClInclude Include="..\src\bed.h" />
+    <ClInclude Include="..\src\bestiary.h" />
     <ClInclude Include="..\src\chat.h" />
+    <ClInclude Include="..\src\charm.h" />
     <ClInclude Include="..\src\combat.h" />
     <ClInclude Include="..\src\condition.h" />
     <ClInclude Include="..\src\configmanager.h" />
@@ -261,7 +258,6 @@
     <ClInclude Include="..\src\events.h" />
     <ClInclude Include="..\src\fileloader.h" />
     <ClInclude Include="..\src\game.h" />
-    <ClInclude Include="..\src\gamestore.h" />
     <ClInclude Include="..\src\globalevent.h" />
     <ClInclude Include="..\src\groups.h" />
     <ClInclude Include="..\src\guild.h" />
@@ -279,7 +275,6 @@
     <ClInclude Include="..\src\items.h" />
     <ClInclude Include="..\src\lockfree.h" />
     <ClInclude Include="..\src\luascript.h" />
-    <ClInclude Include="..\src\loguru.h" />
     <ClInclude Include="..\src\mailbox.h" />
     <ClInclude Include="..\src\map.h" />
     <ClInclude Include="..\src\modules.h" />
@@ -296,10 +291,16 @@
     <ClInclude Include="..\src\player.h" />
     <ClInclude Include="..\src\position.h" />
     <ClInclude Include="..\src\protocol.h" />
+    <ClInclude Include="..\src\prey.h" />
+    <ClInclude Include="..\src\protocolcheck.h" />
     <ClInclude Include="..\src\protocolgame.h" />
+    <ClInclude Include="..\src\protocolgamebase.h" />
     <ClInclude Include="..\src\protocollogin.h" />
+    <ClInclude Include="..\src\protocolold.h" />
+    <ClInclude Include="..\src\protocolspectator.h" />
     <ClInclude Include="..\src\protocolstatus.h" />
     <ClInclude Include="..\src\pugicast.h" />
+    <ClInclude Include="..\src\quests.h" />
     <ClInclude Include="..\src\raids.h" />
     <ClInclude Include="..\src\reward.h" />
     <ClInclude Include="..\src\rewardchest.h" />
@@ -309,8 +310,11 @@
     <ClInclude Include="..\src\scriptmanager.h" />
     <ClInclude Include="..\src\server.h" />
     <ClInclude Include="..\src\signals.h" />
+    <ClInclude Include="..\src\site.h" />
     <ClInclude Include="..\src\spawn.h" />
+    <ClInclude Include="..\src\spectators.h" />
     <ClInclude Include="..\src\spells.h" />
+    <ClInclude Include="..\src\store.h" />
     <ClInclude Include="..\src\talkaction.h" />
     <ClInclude Include="..\src\tasks.h" />
     <ClInclude Include="..\src\teleport.h" />
@@ -324,9 +328,18 @@
     <ClInclude Include="..\src\waitlist.h" />
     <ClInclude Include="..\src\weapons.h" />
     <ClInclude Include="..\src\wildcardtree.h" />
-    <ClInclude Include="..\src\xtea.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\protobuf.2.6.1.1\build\native\protobuf.targets" Condition="Exists('packages\protobuf.2.6.1.1\build\native\protobuf.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\protobuf.2.6.1.1\build\native\protobuf.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\protobuf.2.6.1.1\build\native\protobuf.targets'))" />
+  </Target>
 </Project>

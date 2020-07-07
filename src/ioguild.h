@@ -1,6 +1,6 @@
 /**
  * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019  Mark Samman <mark.samman@gmail.com>
+ * Copyright (C) 2019 Mark Samman <mark.samman@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #define FS_IOGUILD_H_EF9ACEBA0B844C388B70FF52E69F1AFF
 
 class Guild;
+
 using GuildWarVector = std::vector<uint32_t>;
 
 class IOGuild
@@ -29,6 +30,11 @@ class IOGuild
 		static Guild* loadGuild(uint32_t guildId);
 		static uint32_t getGuildIdByName(const std::string& name);
 		static void getWarList(uint32_t guildId, GuildWarVector& guildWarVector);
+
+		static void setPoints(uint32_t guildId, uint32_t newPoints);
+		static void setLevel(uint32_t guildId, uint32_t newlevel);
+		
+		static void setBalance(uint32_t guildId, uint64_t amount);
 };
 
 #endif

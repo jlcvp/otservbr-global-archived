@@ -49,14 +49,14 @@
 	<wand id="25955" level="100" mana="18" min="70" max="105" type="ice"> <!-- Rod of Remedy -->
 		<vocation name="Druid" />
 	</wand>
-	 <wand id="30693" level="200" mana="20" min="80" max="110" type="ice"> <!-- Rod of destruction -->
+	 <wand id="30693" level="100" mana="20" min="80" max="110" type="ice"> <!-- Rod of destruction -->
 		<vocation name="Druid" />
 	</wand>
 	<wand id="29005" level="80" mana="18" min="63" max="77" type="energy"> <!-- Dream Blossom Staff -->
 		<vocation name="Sorcerer" />
 		<vocation name="Druid" />
 	</wand>
-	<wand id="32416" level="300" mana="20" min="87" max="101" type="earth"> <!-- Falcon Rod -->
+	<wand id="33218" level="300" mana="20" min="87" max="101" type="earth"> <!-- Falcon Rod -->
 		<vocation name="Druid" />
 	</wand>
 	<wand id="32522" level="300" mana="23" min="86" max="93" type="ice"> <!-- Deepling Ceremonial Dagger -->
@@ -67,12 +67,9 @@
 		<vocation name="Druid" />
 		<vocation name="Sorcerer" />
 	</wand>
-	<wand id="34063" level="180" mana="24" min="88" max="108" type="fire"> <!-- Energized Limb -->
+	<wand id="33918" level="180" mana="24" min="88" max="108" type="fire"> <!-- Energized Limb -->
 		<vocation name="Druid" />
 		<vocation name="Sorcerer" />
-	</wand>
-	<wand id="35235" level="220" mana="21" min="70" max="110" type="earth"> <!-- Cobra Rod -->
-		<vocation name="Druid" />
 	</wand>
 	<!-- Wands -->
 	<wand id="23719" level="1" mana="1" min="4" max="8" type="fire"> <!-- The Scorcher -->
@@ -132,18 +129,21 @@
 	<wand id="25951" level="100" mana="18" min="70" max="105" type="energy"> <!-- Wand of Remedy -->
 		<vocation name="Sorcerer" />
 	</wand>
-	    <wand id="30692" level="200" mana="20" min="80" max="110" type="energy"> <!-- Wand of Destruction -->
+	<wand id="30692" level="100" mana="20" min="80" max="110" type="energy"> <!-- Wand of Destruction -->
 		<vocation name="Sorcerer" />
 	</wand>
-	<wand id="32417" level="300" mana="21" min="86" max="102" type="energy"> <!-- Falcon Wand -->
+	<wand id="33219" level="300" mana="21" min="86" max="102" type="energy"> <!-- Falcon Wand -->
 		<vocation name="Sorcerer" />
-	</wand>
-	
-	<wand id="35234" level="200" mana="22" min="94" max="100" type="energy"> <!-- Cobra Wand -->
+	</wand>	
+	<wand id="35113" level="200" mana="22" min="80" max="96" type="energy"> <!-- Cobra wand -->
 		<vocation name="Sorcerer" />
 	</wand>
 
 	<!-- Swords -->
+	<melee id="35112" level="220" unproperly="1"> <!--Cobra Sword-->
+		<vocation name="Knight" />	
+
+	</melee>		
 	<melee id="34059" level="180" unproperly="1">
 		<vocation name="Knight" />
 
@@ -193,7 +193,6 @@
 	<melee id="7416" level="55" unproperly="1" />
 	<melee id="2393" level="55" unproperly="1">
 		<vocation name="Knight" />
-
 	</melee>
 	<melee id="7384" level="60" unproperly="1" />
 	<melee id="7382" level="60" unproperly="1">
@@ -349,6 +348,11 @@
 	<melee id="23548" level="25" unproperly="1" />
 
 	<!-- Axes -->
+	
+	<melee id="37342" level="180" unproperly="1"> <!--phantasmal axe-->
+		<vocation name="Knight" />
+	</melee>
+		
 	<melee id="33925" unproperly="1">
 		<vocation name="Knight" />
 
@@ -479,6 +483,9 @@
 	<melee id="23545" level="45" unproperly="1" />
 
 	<!--Clubs -->
+	<melee id="35109" level="220" unproperly="1"><!--cobra club-->
+		<vocation name="Knight" />
+	</melee>
 	<melee id="34057" level="180" unproperly="1">
 		<vocation name="Knight" />
 
@@ -693,10 +700,11 @@
 		<vocation name="Paladin" />
 
 	</distance>
+	
 	<distance id="18454" level="105" unproperly="1"> <!-- Mycological Bow -->
 		<vocation name="Paladin" />
-
 	</distance>
+	
 	<distance id="21690" level="70" unproperly="1"> <!-- Triple Bolt Crossbow -->
 		<vocation name="Paladin" />
 
@@ -758,11 +766,11 @@
 		<vocation name="Paladin" />
 
 	</distance>
-	<distance id="30690" level="200" unproperly="1"> <!-- Bow of Destruction -->
+	<distance id="30690" level="100" unproperly="1"> <!-- Bow of Destruction -->
 		<vocation name="Paladin" />
 
 	</distance>
-	<distance id="30691" level="200" unproperly="1"> <!-- Crossbow of Destruction -->
+	<distance id="30691" level="100" unproperly="1"> <!-- Crossbow of Destruction -->
 		<vocation name="Paladin" />
 
 	</distance>
@@ -772,9 +780,9 @@
 	</distance>
 
 	<!-- Ammunition -->
-	<distance id="1294" breakchance="3" /> <!-- small stone -->
+	<distance id="1294" breakchance="0" /> <!-- small stone -->
 	<distance id="2111" action="removecount" /> <!-- snowball -->
-	<distance id="2389" breakchance="3" /> <!-- spear -->
+	<distance id="2389" breakchance="0" /> <!-- spear -->
 	<distance id="2399" breakchance="10" /> <!-- throwing star -->
 	<distance id="2410" breakchance="7" /> <!-- throwing knife -->
 	<distance id="2543" action="removecount" /> <!-- bolt -->
@@ -782,16 +790,16 @@
 	<distance id="2545" action="removecount" script="poison_arrow.lua" /> <!-- poison arrow -->
 	<distance id="2546" action="removecount" script="burst_arrow.lua" /> <!-- burst arrow -->
 	<distance id="2547" action="removecount" unproperly="1" level="55" /> <!-- Power Bolt -->
-	<distance id="3965" breakchance="6" unproperly="1" level="20" /> <!-- Hunting Spear -->
+	<distance id="3965" breakchance="0" unproperly="1" level="20" /> <!-- Hunting Spear -->
 	<distance id="6529" action="removecount" unproperly="1" level="110" /> <!-- Infernal Bolt -->
 	<distance id="7363" action="removecount" unproperly="1" level="30" /> <!-- Piercing Bolt -->
 	<distance id="7364" action="removecount" unproperly="1" level="20" /> <!-- Sniper Arrow -->
 	<distance id="7365" action="removecount" unproperly="1" level="40" /> <!-- Onyx Arrow -->
 	<distance id="7366" breakchance="9" script="viper_star.lua" />
-	<distance id="7367" breakchance="1" unproperly="1" level="42" /> <!-- Enchanted Spear -->
+	<distance id="7367" breakchance="0" unproperly="1" level="42" /> <!-- Enchanted Spear -->
 	<distance id="7368" breakchance="33" unproperly="1" level="80" /> <!-- Assassin Star -->
 	<distance id="29036" breakchance="30" unproperly="1" level="60" /> <!-- Leaf Star -->
-	<distance id="7378" breakchance="3" unproperly="1" level="25" /> <!-- Royal Spear -->
+	<distance id="7378" breakchance="0" unproperly="1" level="25" /> <!-- Royal Spear -->
 	<distance id="7838" action="removecount" unproperly="1" level="20" /> <!-- Flash Arrow -->
 	<distance id="7839" action="removecount" unproperly="1" level="20" /> <!-- Shiver Arrow -->
 	<distance id="7840" action="removecount" unproperly="1" level="20" /> <!-- Flaming Arrow -->

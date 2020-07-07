@@ -1,20 +1,38 @@
 # OTServ Brasil - Global Server
 
 ## Builds
-[![Build status](https://ci.appveyor.com/api/projects/status/github/opentibiabr/otservbr-global?branch=develop&passingText=develop%20-%20OK&svg=true)](https://ci.appveyor.com/project/opentibiabr/otservbr-global "Download nightly builds for Windows")
-[![Build Status](https://travis-ci.org/opentibiabr/OTServBR-Global.svg?branch=develop)](https://travis-ci.org/opentibiabr/OTServBR-Global "Linux Build Status - Develop Branch")
+[![Build status](https://ci.appveyor.com/api/projects/status/github/opentibiabr/otservbr-global?branch=develop&passingText=develop%20-%20OK&svg=true)](https://ci.appveyor.com/project/eduardodantas95/otservbr-global "Download nightly builds for Windows")
+[![Build Status](https://travis-ci.org/opentibiabr/OTServBR-Global.svg?branch=develop)](https://travis-ci.org/dudantas/otservbr-global "Linux Build Status - Shared Base 1 Branch")
 
 [![Build on MacOS](https://github.com/opentibiabr/otservbr-global/workflows/Build%20on%20MacOS/badge.svg)](https://github.com/opentibiabr/otservbr-global/actions?query=workflow%3A%22Build+on+MacOS%22)
 [![Build on Ubuntu](https://github.com/opentibiabr/otservbr-global/workflows/Build%20on%20Ubuntu/badge.svg)](https://github.com/opentibiabr/otservbr-global/actions?query=workflow%3A%22Build+on+Ubuntu%22)
 [![Build on Windows](https://github.com/opentibiabr/otservbr-global/workflows/Build%20on%20Windows/badge.svg)](https://github.com/opentibiabr/otservbr-global/actions?query=workflow%3A%22Build+on+Windows%22)
 
-## Syntax/Linters
-[![C++ linter](https://github.com/opentibiabr/otservbr-global/workflows/C++%20linter/badge.svg)](https://github.com/opentibiabr/otservbr-global/actions?query=workflow%3A%22C%2B%2B+linter%22)
+## Branch Shared-Base
+This branch is from a server coming from a donation made by a member of the OTServBR-Global project (who prefers to remain anonymous).
+If the creator or creators of any system that is here, want the credits and can prove to be the developer of them, get in touch with me on the discord (Eduardo Dantas #2451) and we'll talk about it.
 
-[![Lua linter](https://github.com/opentibiabr/otservbr-global/workflows/Lua%20linter/badge.svg)](https://github.com/opentibiabr/otservbr-global/actions?query=workflow%3A%22Lua+linter%22)
-[![Lua syntax check](https://github.com/opentibiabr/otservbr-global/workflows/Lua%20syntax%20check/badge.svg)](https://github.com/opentibiabr/otservbr-global/actions?query=workflow%3A%22Lua+syntax+check%22)
+Has the following systems working (source)
+Protocol 10.00 and 12.30 (working 100%)
+Bestiary (working 100%)
+Charm (working 100%)
+Store (working 100%)
+Quickloot (working 100%)
+Cast system (working 100%)
+Wrap system (working 100%)
+Proxy (not tested)
+Custom spawns loading system (working 100%)
+And many others features
 
-[![XML syntax check](https://github.com/opentibiabr/otservbr-global/workflows/XML%20syntax%20check/badge.svg)](https://github.com/opentibiabr/otservbr-global/actions?query=workflow%3A%22XML+syntax+check%22)
+Datapack:
+Several quests working, including dream courts, ferumbras, halls of hope, cults of tibia, forgotten knowledge and others
+
+## Downloads
+* [Client 12.30](https://github.com/dudantas/tibia-client)
+Download in the Code (or clone) button and "Download Zip"
+* [Compatible Gesior](https://forums.otserv.com.br/index.php?/forums/topic/169428-premium-gesior-aac/)
+
+* For download the executables and dll files, goto for the [develop - OK](https://ci.appveyor.com/project/eduardodantas95/otservbr-global "Download nightly builds for Windows") ok button, slightly above, then go to configuration: release> artifacts> otservbr-global.zip
 
 ## Docs/Help
 [![Documentation](https://codedocs.xyz/Costallat/otservbr-global.svg)](https://codedocs.xyz/Costallat/otservbr-global/)
@@ -28,7 +46,7 @@ OTServ Brasil - Global Server is a free and open-source MMORPG server emulator w
 * [Compiling on Windows](https://forums.otserv.com.br/index.php?/forums/topic/169235-windowsvc2019-compilando-sources-otservbr-global/), alternatively download [nightly builds for Windows](https://ci.appveyor.com/project/opentibiabr/otservbr-global).
 
 ### Issues
-We use the [issue tracker on GitHub](https://github.com/opentibiabr/OTServBR-Global/issues). Keep in mind that everyone who is watching the repository gets notified by e-mail when there is an activity, so be thoughtful and avoid writing comments that aren't meant for an issue (e.g. "+1"). If you'd like for an issue to be fixed faster, you should either fix it yourself and submit a pull request, or place a bounty on the issue.
+We use the [issue tracker on GitHub](https://github.com/dudantas/otservbr-global/issues). Keep in mind that everyone who is watching the repository gets notified by e-mail when there is an activity, so be thoughtful and avoid writing comments that aren't meant for an issue (e.g. "+1"). If you'd like for an issue to be fixed faster, you should either fix it yourself and submit a pull request, or place a bounty on the issue.
 
 ### Special Thanks
 - our partners

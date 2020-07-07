@@ -1,6 +1,6 @@
 /**
  * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019  Mark Samman <mark.samman@gmail.com>
+ * Copyright (C) 2019 Mark Samman <mark.samman@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -245,7 +245,7 @@ bool DBResult::next()
 	return row != nullptr;
 }
 
-DBInsert::DBInsert(std::string insertQuery) : query(std::move(insertQuery))
+DBInsert::DBInsert(std::string query) : query(std::move(query))
 {
 	this->length = this->query.length();
 }

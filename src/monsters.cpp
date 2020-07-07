@@ -1,6 +1,6 @@
 /**
  * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019  Mark Samman <mark.samman@gmail.com>
+ * Copyright (C) 2019 Mark Samman <mark.samman@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 #include "monsters.h"
 #include "monster.h"
+#include "bestiary.h"
 #include "spells.h"
 #include "combat.h"
 #include "weapons.h"
@@ -33,6 +34,7 @@ extern Game g_game;
 extern Spells* g_spells;
 extern Monsters g_monsters;
 extern ConfigManager g_config;
+extern Bestiaries g_bestiaries;
 
 spellBlock_t::~spellBlock_t()
 {
@@ -67,18 +69,25 @@ bool Monsters::loadFromXml(bool reloading /*= false*/)
 	}
 
 	loaded = true;
-
+	std::map<std::string, uint16_t> bestiaryMonsters = g_bestiaries.getMonsterNameMap();
 	for (auto monsterNode : doc.child("monsters").children()) {
 		std::string name = asLowerCaseString(monsterNode.attribute("name").as_string());
+		uint16_t race = 0;
+		auto it = bestiaryMonsters.find(name);
+		if (it != bestiaryMonsters.end()) {
+			race = it->second;
+		}
+		if (race != 0) {
+			raceidMonsters[race] = name;
+		}
 		std::string file = "data/monster/" + std::string(monsterNode.attribute("file").as_string());
 		auto forceLoad = g_config.getBoolean(ConfigManager::FORCE_MONSTERTYPE_LOAD);
 		if (forceLoad) {
-			loadMonster(file, name, true);
+			loadMonster(file, name, true, race);
 			continue;
 		}
-
 		if (reloading && monsters.find(name) != monsters.end()) {
-			loadMonster(file, name, true);
+			loadMonster(file, name, true, race);
 		} else {
 			unloadedMonsters.emplace(name, file);
 		}
@@ -752,13 +761,14 @@ bool Monsters::deserializeSpell(MonsterSpell* spell, spellBlock_t& sb, const std
 	return true;
 }
 
-MonsterType* Monsters::loadMonster(const std::string& file, const std::string& monsterName, bool reloading /*= false*/)
+MonsterType* Monsters::loadMonster(const std::string& file, const std::string& monsterName, bool reloading /*= false*/, uint16_t raceid)
 {
 	MonsterType* mType = nullptr;
 
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file(file.c_str());
 	if (!result) {
+		std::cout << "[Monster - " << monsterName << "] ";
 		printXMLError("Error - Monsters::loadMonster", file, result);
 		return nullptr;
 	}
@@ -818,11 +828,17 @@ MonsterType* Monsters::loadMonster(const std::string& file, const std::string& m
 	}
 
 	if ((attr = monsterNode.attribute("speed"))) {
-		mType->info.baseSpeed = pugi::cast<int32_t>(attr.value());
+		mType->info.baseSpeed = pugi::cast<int32_t>(attr.value()) * g_config.getDouble(ConfigManager::RATE_MONSTER_SPEED);
 	}
 
 	if ((attr = monsterNode.attribute("manacost"))) {
 		mType->info.manaCost = pugi::cast<uint32_t>(attr.value());
+	}
+
+	if ((attr = monsterNode.attribute("raceid"))) {
+		mType->info.raceid = pugi::cast<uint16_t>(attr.value());
+	} else if (raceid > 0) {
+		mType->info.raceid = raceid;
 	}
 
 	if ((attr = monsterNode.attribute("skull"))) {
@@ -872,6 +888,8 @@ MonsterType* Monsters::loadMonster(const std::string& file, const std::string& m
 				mType->info.isSummonable = attr.as_bool();
 			} else if (strcasecmp(attrName, "rewardboss") == 0) {
 				mType->info.isRewardBoss = attr.as_bool();
+			} else if (strcasecmp(attrName, "preyable") == 0) {
+				mType->info.isPreyable = attr.as_bool();
 			} else if (strcasecmp(attrName, "attackable") == 0) {
 				mType->info.isAttackable = attr.as_bool();
 			} else if (strcasecmp(attrName, "hostile") == 0) {
@@ -1383,6 +1401,9 @@ bool Monsters::loadLootItem(const pugi::xml_node& node, LootBlock& lootBlock)
 	if ((attr = node.attribute("unique"))) {
 		lootBlock.unique = attr.as_bool();
 	}
+	if ((attr = node.attribute("raid"))) {
+		lootBlock.raid = attr.as_bool();
+	}
 	return true;
 }
 
@@ -1394,6 +1415,19 @@ void Monsters::loadLootContainer(const pugi::xml_node& node, LootBlock& lBlock)
 			lBlock.childLoot.emplace_back(std::move(lootBlock));
 		}
 	}
+}
+
+// Prey Monsters
+std::vector<std::string> Monsters::getPreyMonsters()
+{
+	std::vector<std::string> monsterList;
+	for (const auto& m : monsters) {
+		if (m.second.info.experience > 0 && m.second.info.isPreyable && !m.second.info.isRewardBoss && m.second.info.staticAttackChance > 0) {
+			monsterList.push_back(m.first);
+		}
+	}
+
+	return monsterList;
 }
 
 MonsterType* Monsters::getMonsterType(const std::string& name)
@@ -1412,10 +1446,17 @@ MonsterType* Monsters::getMonsterType(const std::string& name)
 	return &it->second;
 }
 
+MonsterType* Monsters::getMonsterTypeByRace(uint16_t raceid)
+{
+	auto it = raceidMonsters.find(raceid);
+	if (it != raceidMonsters.end()) {
+		return getMonsterType(it->second);
+	}
+
+	return nullptr;
+}
+
 void Monsters::addMonsterType(const std::string& name, MonsterType* mType)
 {
-	// Suppress [-Werror=unused-but-set-parameter]
-	// https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables
-	(void) mType;
 	mType = &monsters[asLowerCaseString(name)];
 }

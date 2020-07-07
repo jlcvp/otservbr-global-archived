@@ -1,6 +1,6 @@
 /**
  * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019  Mark Samman <mark.samman@gmail.com>
+ * Copyright (C) 2019 Mark Samman <mark.samman@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,14 +29,18 @@ Container::Container(uint16_t type) :
 	Container(type, items[type].maxItems) {
 	if (getID() == ITEM_GOLD_POUCH) {
 		pagination = true;
+		maxSize = 25;
+	} else if (getID() == ITEM_INBOX || getID() == ITEM_DEPOT) {
+		islocker = true;
 	}
 }
 
-Container::Container(uint16_t initType, uint16_t initSize, bool initUnlocked /*= true*/, bool initPagination /*= false*/) :
-	Item(initType),
-	maxSize(initSize),
-	unlocked(initUnlocked),
-	pagination(initPagination)
+Container::Container(uint16_t type, uint16_t size, bool unlocked /*= true*/, bool pagination /*= false*/, bool islocker /*= false*/) :
+	Item(type),
+	maxSize(size),
+	unlocked(unlocked),
+	pagination(pagination),
+	islocker(islocker)
 {}
 
 Container::Container(Tile* tile) : Container(ITEM_BROWSEFIELD, 30, false, true)
@@ -44,7 +48,7 @@ Container::Container(Tile* tile) : Container(ITEM_BROWSEFIELD, 30, false, true)
 	TileItemVector* itemVector = tile->getItemList();
 	if (itemVector) {
 		for (Item* item : *itemVector) {
-			if (((item->getContainer() || item->hasProperty(CONST_PROP_MOVEABLE)) || (item->isWrapable() && !item->hasProperty(CONST_PROP_MOVEABLE) && !item->hasProperty(CONST_PROP_BLOCKPATH))) && !item->hasAttribute(ITEM_ATTRIBUTE_UNIQUEID)) {
+			if ((item->getContainer() || item->hasProperty(CONST_PROP_MOVEABLE)) && !item->hasAttribute(ITEM_ATTRIBUTE_UNIQUEID)) {
 				itemlist.push_front(item);
 				item->setParent(this);
 			}
@@ -202,7 +206,7 @@ std::ostringstream& Container::getContentDescription(std::ostringstream& os) con
 			os << ", ";
 		}
 
-		os << "{" << item->getClientID() << "|" << item->getNameDescription() << "}";
+		os << item->getNameDescription();
 	}
 
 	if (firstitem) {
@@ -297,7 +301,7 @@ void Container::onRemoveContainerItem(uint32_t index, Item* item)
 	}
 }
 
-ReturnValue Container::queryAdd(int32_t addIndex, const Thing& addThing, uint32_t addCount,
+ReturnValue Container::queryAdd(int32_t index, const Thing& thing, uint32_t count,
 		uint32_t flags, Creature* actor/* = nullptr*/) const
 {
 	bool childIsOwner = hasBitSet(FLAG_CHILDISOWNER, flags);
@@ -311,7 +315,7 @@ ReturnValue Container::queryAdd(int32_t addIndex, const Thing& addThing, uint32_
 		return RETURNVALUE_NOTPOSSIBLE;
 	}
 
-	const Item* item = addThing.getItem();
+	const Item* item = thing.getItem();
 	if (item == nullptr) {
 		return RETURNVALUE_NOTPOSSIBLE;
 	}
@@ -327,7 +331,7 @@ ReturnValue Container::queryAdd(int32_t addIndex, const Thing& addThing, uint32_
 	const Cylinder* cylinder = getParent();
 	if (!hasBitSet(FLAG_NOLIMIT, flags)) {
 		while (cylinder) {
-			if (cylinder == &addThing) {
+			if (cylinder == &thing) {
 				return RETURNVALUE_THISISIMPOSSIBLE;
 			}
 
@@ -338,12 +342,12 @@ ReturnValue Container::queryAdd(int32_t addIndex, const Thing& addThing, uint32_
 			cylinder = cylinder->getParent();
 		}
 
-		if (addIndex == INDEX_WHEREEVER && size() >= capacity() && !hasPagination()) {
+		if (index == INDEX_WHEREEVER && size() >= capacity() && !hasPagination()) {
 			return RETURNVALUE_CONTAINERNOTENOUGHROOM;
 		}
 	} else {
 		while (cylinder) {
-			if (cylinder == &addThing) {
+			if (cylinder == &thing) {
 				return RETURNVALUE_THISISIMPOSSIBLE;
 			}
 
@@ -373,7 +377,7 @@ ReturnValue Container::queryAdd(int32_t addIndex, const Thing& addThing, uint32_
 
 	const Cylinder* topParent = getTopParent();
 	if (topParent != this) {
-		return topParent->queryAdd(INDEX_WHEREEVER, *item, addCount, flags | FLAG_CHILDISOWNER, actor);
+		return topParent->queryAdd(INDEX_WHEREEVER, *item, count, flags | FLAG_CHILDISOWNER, actor);
 	} else {
 		return RETURNVALUE_NOERROR;
 	}
@@ -509,10 +513,6 @@ Cylinder* Container::queryDestination(int32_t& index, const Thing &thing, Item**
 
 	bool autoStack = !hasBitSet(FLAG_IGNOREAUTOSTACK, flags);
 	if (autoStack && item->isStackable() && item->getParent() != this) {
-		if (*destItem && (*destItem)->equals(item) && (*destItem)->getItemCount() < 100) {
-			return this;
-		}
-
 		//try find a suitable item to stack with
 		uint32_t n = 0;
 		for (Item* listItem : itemlist) {

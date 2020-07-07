@@ -1,6 +1,4 @@
 /**
- * @file protocolstatus.cpp
- * 
  * The Forgotten Server - a free and open-source MMORPG server emulator
  * Copyright (C) 2019 Mark Samman <mark.samman@gmail.com>
  *
@@ -30,7 +28,7 @@ extern ConfigManager g_config;
 extern Game g_game;
 
 std::map<uint32_t, int64_t> ProtocolStatus::ipConnectMap;
-const uint64_t ProtocolStatus::start = OTSYS_TIME();
+const uint64_t ProtocolStatus::start = OTSYS_TIME(true);
 
 enum RequestedInfo_t : uint16_t {
 	REQUEST_BASIC_SERVER_INFO = 1 << 0,

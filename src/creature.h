@@ -1,6 +1,6 @@
 /**
  * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019  Mark Samman <mark.samman@gmail.com>
+ * Copyright (C) 2019 Mark Samman <mark.samman@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,13 @@
 using ConditionList = std::list<Condition*>;
 using CreatureEventList = std::list<CreatureEvent*>;
 
+enum creatureCombatStatus_T : int8_t
+{
+	COMBAT_STATUS_NONE = 0,
+	COMBAT_STATUS_IN_CHECK = 1,
+	COMBAT_STATUS_CHECKED = 2,
+};
+
 enum slots_t : uint8_t {
 	CONST_SLOT_WHEREEVER = 0,
 	CONST_SLOT_HEAD = 1,
@@ -43,6 +50,7 @@ enum slots_t : uint8_t {
 	CONST_SLOT_FEET = 8,
 	CONST_SLOT_RING = 9,
 	CONST_SLOT_AMMO = 10,
+
 	CONST_SLOT_STORE_INBOX = 11,
 
 	CONST_SLOT_FIRST = CONST_SLOT_HEAD,
@@ -75,15 +83,15 @@ static constexpr int32_t EVENT_CHECK_CREATURE_INTERVAL = (EVENT_CREATURE_THINK_I
 class FrozenPathingConditionCall
 {
 	public:
-		explicit FrozenPathingConditionCall(Position newTargetPos) : targetPos(std::move(newTargetPos)) {}
+		explicit FrozenPathingConditionCall(Position targetPos) : targetPos(std::move(targetPos)) {}
 
 		bool operator()(const Position& startPos, const Position& testPos,
-		                const FindPathParams& fpp, int32_t& bestMatchDist) const;
+						const FindPathParams& fpp, int32_t& bestMatchDist) const;
 
 		bool isInRange(const Position& startPos, const Position& testPos,
-		               const FindPathParams& fpp) const;
+					   const FindPathParams& fpp) const;
 
-	private:
+	protected:
 		Position targetPos;
 };
 
@@ -105,10 +113,18 @@ class Creature : virtual public Thing
 		Creature(const Creature&) = delete;
 		Creature& operator=(const Creature&) = delete;
 
-		Creature* getCreature() override final {
+		void setSpectatorId(uint32_t sid) {
+            spectatorId = sid;
+        }
+
+        uint16_t getSpectatorId() const {
+            return spectatorId;
+        }
+
+		Creature* getCreature() final {
 			return this;
 		}
-		const Creature* getCreature() const override final {
+		const Creature* getCreature() const final {
 			return this;
 		}
 		virtual Player* getPlayer() {
@@ -136,12 +152,16 @@ class Creature : virtual public Thing
 		virtual CreatureType_t getType() const = 0;
 
 		virtual void setID() = 0;
+		virtual void setCombatID() = 0;
 		void setRemoved() {
 			isInternalRemoved = true;
 		}
 
 		uint32_t getID() const {
 			return id;
+		}
+		uint32_t getCombatID() const {
+			return combatid;
 		}
 		virtual void removeList() = 0;
 		virtual void addList() = 0;
@@ -180,13 +200,13 @@ class Creature : virtual public Thing
 			moveLocked = locked;
 		}
 
-		int32_t getThrowRange() const override final {
+		int32_t getThrowRange() const final {
 			return 1;
 		}
 		bool isPushable() const override {
 			return getWalkDelay() <= 0;
 		}
-		bool isRemoved() const override final {
+		bool isRemoved() const final {
 			return isInternalRemoved;
 		}
 		virtual bool canSeeInvisibility() const {
@@ -238,7 +258,22 @@ class Creature : virtual public Thing
 			return mana;
 		}
 		virtual uint32_t getMaxMana() const {
-			return mana;
+			return 0;
+		}
+
+		creatureCombatStatus_T getProtectionCombatStatus() {
+			return protectionCombatStatus;
+		}
+
+		void updateProtectionCombatStatus(creatureCombatStatus_T value) {
+			protectionCombatStatus = value;
+		}
+		int32_t getProtectionCombat() {
+			return protectionCombat;
+		}
+
+		void updateProtectionCombat(int32_t value) {
+			protectionCombat += value;
 		}
 
 		const Outfit_t getCurrentOutfit() const {
@@ -282,7 +317,7 @@ class Creature : virtual public Thing
 		}
 		virtual bool setAttackedCreature(Creature* creature);
 		virtual BlockType_t blockHit(Creature* attacker, CombatType_t combatType, int32_t& damage,
-		                             bool checkDefense = false, bool checkArmor = false, bool field = false);
+									 bool checkDefense = false, bool checkArmor = false, bool field = false);
 
 		bool setMaster(Creature* newMaster);
 
@@ -315,6 +350,9 @@ class Creature : virtual public Thing
 		}
 		virtual float getDefenseFactor() const {
 			return 1.0f;
+		}
+		virtual bool isDead() const {
+			return false;
 		}
 
 		virtual uint8_t getSpeechBubble() const {
@@ -369,7 +407,7 @@ class Creature : virtual public Thing
 		virtual void onEndCondition(ConditionType_t type);
 		void onTickCondition(ConditionType_t type, bool& bRemove);
 		virtual void onCombatRemoveCondition(Condition* condition);
-		virtual void onAttackedCreature(Creature*) {}
+		virtual void onAttackedCreature(Creature*, bool = true) {}
 		virtual void onAttacked();
 		virtual void onAttackedCreatureDrainHealth(Creature* target, int32_t points);
 		virtual void onTargetCreatureGainHealth(Creature*, int32_t) {}
@@ -393,14 +431,14 @@ class Creature : virtual public Thing
 
 		void onAddTileItem(const Tile* tile, const Position& pos);
 		virtual void onUpdateTileItem(const Tile* tile, const Position& pos, const Item* oldItem,
-		                              const ItemType& oldType, const Item* newItem, const ItemType& newType);
+									  const ItemType& oldType, const Item* newItem, const ItemType& newType);
 		virtual void onRemoveTileItem(const Tile* tile, const Position& pos, const ItemType& iType,
-		                              const Item* item);
+									  const Item* item);
 
 		virtual void onCreatureAppear(Creature* creature, bool isLogin);
 		virtual void onRemoveCreature(Creature* creature, bool isLogout);
 		virtual void onCreatureMove(Creature* creature, const Tile* newTile, const Position& newPos,
-		                            const Tile* oldTile, const Position& oldPos, bool teleport);
+									const Tile* oldTile, const Position& oldPos, bool teleport);
 
 		virtual void onAttackedCreatureDisappear(bool) {}
 		virtual void onFollowCreatureDisappear(bool) {}
@@ -409,6 +447,8 @@ class Creature : virtual public Thing
 
 		virtual void onPlacedCreature() {}
 
+		virtual void setRemoveTime(int32_t) {}
+
 		virtual bool getCombatValues(int32_t&, int32_t&) {
 			return false;
 		}
@@ -416,11 +456,11 @@ class Creature : virtual public Thing
 		size_t getSummonCount() const {
 			return summons.size();
 		}
-		void setDropLoot(bool newLootDrop) {
-			this->lootDrop = newLootDrop;
+		void setDropLoot(bool lootDrop) {
+			this->lootDrop = lootDrop;
 		}
-		void setSkillLoss(bool newSkillLoss) {
-			this->skillLoss = newSkillLoss;
+		void setSkillLoss(bool skillLoss) {
+			this->skillLoss = skillLoss;
 		}
 		void setUseDefense(bool useDefense) {
 			canUseDefense = useDefense;
@@ -430,22 +470,22 @@ class Creature : virtual public Thing
 		bool registerCreatureEvent(const std::string& name);
 		bool unregisterCreatureEvent(const std::string& name);
 
-		Cylinder* getParent() const override final {
+		Cylinder* getParent() const final {
 			return tile;
 		}
-		void setParent(Cylinder* cylinder) override final {
+		void setParent(Cylinder* cylinder) final {
 			tile = static_cast<Tile*>(cylinder);
 			position = tile->getPosition();
 		}
 
-		const Position& getPosition() const override final {
+		const Position& getPosition() const final {
 			return position;
 		}
 
-		Tile* getTile() override final {
+		Tile* getTile() final {
 			return tile;
 		}
-		const Tile* getTile() const override final {
+		const Tile* getTile() const final {
 			return tile;
 		}
 
@@ -508,6 +548,7 @@ class Creature : virtual public Thing
 		uint64_t lastStep = 0;
 		uint32_t referenceCounter = 0;
 		uint32_t id = 0;
+		uint32_t combatid = 0;
 		uint32_t scriptEventsBitField = 0;
 		uint32_t eventWalk = 0;
 		uint32_t walkUpdateTicks = 0;
@@ -520,6 +561,9 @@ class Creature : virtual public Thing
 		int32_t varSpeed = 0;
 		int32_t health = 1000;
 		int32_t healthMax = 1000;
+		uint16_t spectatorId = 0;
+		int32_t protectionCombat = 0;
+		creatureCombatStatus_T protectionCombatStatus = COMBAT_STATUS_NONE;
 
 		Outfit_t currentOutfit;
 		Outfit_t defaultOutfit;

@@ -1,6 +1,6 @@
 /**
  * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019  Mark Samman <mark.samman@gmail.com>
+ * Copyright (C) 2019 Mark Samman <mark.samman@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,17 +24,25 @@
 #include "game.h"
 
 #include "iomarket.h"
+#include "bestiary.h"
+#include "charm.h"
+#include "imbuements.h"
+#include "prey.h"
+#include "store.h"
 
 #include "configmanager.h"
 #include "scriptmanager.h"
 #include "rsa.h"
+#include "protocolcheck.h"
+#include "protocolspectator.h"
+#include "protocolold.h"
 #include "protocollogin.h"
 #include "protocolstatus.h"
 #include "databasemanager.h"
 #include "scheduler.h"
 #include "databasetasks.h"
 #include "script.h"
-#include <fstream>
+// TODO: #include "stdarg.h"
 
 DatabaseTasks g_databaseTasks;
 Dispatcher g_dispatcher;
@@ -46,6 +54,11 @@ Monsters g_monsters;
 Vocations g_vocations;
 extern Scripts* g_scripts;
 RSA g_RSA;
+Prey g_prey;
+Store g_store;
+Imbuements g_imbuements;
+Bestiaries g_bestiaries;
+Charms g_charms;
 
 std::mutex g_loaderLock;
 std::condition_variable g_loaderSignal;
@@ -69,10 +82,6 @@ void badAllocationHandler()
 
 int main(int argc, char* argv[])
 {
-#ifdef DEBUG_LOG
-	loguru::g_stderr_verbosity = 9;
-#endif
-	loguru::init(argc, argv);
 	// Setup bad allocation handler
 	std::set_new_handler(badAllocationHandler);
 
@@ -98,15 +107,17 @@ int main(int argc, char* argv[])
 	g_scheduler.join();
 	g_databaseTasks.join();
 	g_dispatcher.join();
+	std::cout << ">> Saving player items." << std::endl;
 	return 0;
 }
 
-void mainLoader(int, char*[], ServiceManager* services)
+void mainLoader(int argc, char* argv[], ServiceManager* services)
 {
+	uint64_t starttime = OTSYS_TIME(true);
 	//dispatcher thread
 	g_game.setGameState(GAME_STATE_STARTUP);
 
-	srand(static_cast<unsigned int>(OTSYS_TIME()));
+	srand(static_cast<unsigned int>(OTSYS_TIME(true)));
 #ifdef _WIN32
 	SetConsoleTitle(STATUS_SERVER_NAME);
 #endif
@@ -125,29 +136,21 @@ void mainLoader(int, char*[], ServiceManager* services)
 #endif
 	std::cout << std::endl;
 
-	std::cout << "A server developed by " << STATUS_SERVER_DEVELOPERS << std::endl;
-	std::cout << "Visit our forum for updates, support, and resources: https://otserv.com.br/" << std::endl;
+	std::cout << "A server developed by: " << STATUS_SERVER_DEVELOPERS << "." << std::endl;
 	std::cout << std::endl;
 
-	// check if config.lua or config.lua.dist exist
-	std::ifstream c_test("./config.lua");
-	if (!c_test.is_open()) {
-		std::ifstream config_lua_dist("./config.lua.dist");
-		if (config_lua_dist.is_open()) {
-			std::cout << ">> copying config.lua.dist to config.lua" << std::endl;
-			std::ofstream config_lua("config.lua");
-			config_lua << config_lua_dist.rdbuf();
-			config_lua.close();
-			config_lua_dist.close();
+	// TODO: dirty for now; Use stdarg;
+	if (argc > 1) {
+		std::string param = { argv[1] };
+		if (param == "-c") {
+			g_config.setConfigFileLua(argv[2]);
 		}
-	} else {
-		c_test.close();
 	}
 
 	// read global config
-	std::cout << ">> Loading config" << std::endl;
+	std::cout << ">> Loading config: " << g_config.getConfigFileLua() << std::endl;
 	if (!g_config.load()) {
-		startupErrorMessage("Unable to load config.lua!");
+		startupErrorMessage("Unable to load Config File!");
 		return;
 	}
 
@@ -161,12 +164,7 @@ void mainLoader(int, char*[], ServiceManager* services)
 #endif
 
 	//set RSA key
-	try {
-		g_RSA.loadPEM("key.pem");
-	} catch(const std::exception& e) {
-		startupErrorMessage(e.what());
-		return;
-	}
+	g_RSA.loadPEM("key.pem");
 
 	std::cout << ">> Establishing database connection..." << std::flush;
 
@@ -176,12 +174,11 @@ void mainLoader(int, char*[], ServiceManager* services)
 	}
 
 	std::cout << " MySQL " << Database::getClientVersion() << std::endl;
-
 	// run database manager
 	std::cout << ">> Running database manager" << std::endl;
 
 	if (!DatabaseManager::isDatabaseSetup()) {
-		startupErrorMessage("The database you have specified in config.lua is empty, please import the schema.sql to your database.");
+		startupErrorMessage("The database you have specified in config lua file is empty, please import the schema.sql to your database.");
 		return;
 	}
 	g_databaseTasks.start();
@@ -211,9 +208,23 @@ void mainLoader(int, char*[], ServiceManager* services)
 		return;
 	}
 
+	// if (g_config.getBoolean(ConfigManager::PROTO_BUFF)) {
+	// 	if (!Item::items.loadFromProtobuf("appearances.dat")) {
+	// 		startupErrorMessage("Unable to load appearances.dat!");
+	// 		return;
+	// 	}
+	// }
+
 	std::cout << ">> Loading script systems" << std::endl;
 	if (!ScriptingManager::getInstance().loadScriptSystems()) {
 		startupErrorMessage("Failed to load script systems");
+		return;
+	}
+
+	// dando prioridade
+	std::cout << ">> Loading bestiary" << std::endl;
+	if (!g_bestiaries.loadFromXml()) {
+		startupErrorMessage("Unable to load Bestiaries!");
 		return;
 	}
 
@@ -241,6 +252,31 @@ void mainLoader(int, char*[], ServiceManager* services)
 		return;
 	}
 
+	std::cout << ">> Loading imbuements" << std::endl;
+	if (!g_imbuements.loadFromXml()) {
+		startupErrorMessage("Unable to load imbuements!");
+		return;
+	}
+
+	std::cout << ">> Loading charms" << std::endl;
+	if (!g_charms.loadFromXml()) {
+		startupErrorMessage("Unable to load Charms!");
+		return;
+	}
+
+
+	std::cout << ">> Loading Store" << std::endl;
+	if (!g_store.loadFromXml()) {
+		startupErrorMessage("Unable to load store!");
+		return;
+	}
+
+	std::cout << ">> Loading prey data" << std::endl;
+	if (!g_prey.loadFromXml()) {
+		startupErrorMessage("Unable to load prey data!");
+		return;
+	}
+
 	std::cout << ">> Checking world type... " << std::flush;
 	std::string worldType = asLowerCaseString(g_config.getString(ConfigManager::WORLD_TYPE));
 	if (worldType == "pvp") {
@@ -249,6 +285,8 @@ void mainLoader(int, char*[], ServiceManager* services)
 		g_game.setWorldType(WORLD_TYPE_NO_PVP);
 	} else if (worldType == "pvp-enforced") {
 		g_game.setWorldType(WORLD_TYPE_PVP_ENFORCED);
+	} else if (worldType == "retro-pvp") {
+		g_game.setWorldType(WORLD_TYPE_RETRO_OPEN_PVP);
 	} else {
 		std::cout << std::endl;
 
@@ -257,6 +295,7 @@ void mainLoader(int, char*[], ServiceManager* services)
 		startupErrorMessage(ss.str());
 		return;
 	}
+
 	std::cout << asUpperCaseString(worldType) << std::endl;
 
 	std::cout << ">> Loading map" << std::endl;
@@ -265,15 +304,32 @@ void mainLoader(int, char*[], ServiceManager* services)
 		return;
 	}
 
+	std::cout << ">> Loading guilds... " << std::flush;
+	if (g_game.loadGuilds()) {
+		std::cout << "All guilds have been loaded." << std::endl;
+	} else {
+		std::cout << "No guild to load." << std::endl;
+	}
+
 	std::cout << ">> Initializing gamestate" << std::endl;
 	g_game.setGameState(GAME_STATE_INIT);
 
 	// Game client protocols
 	services->add<ProtocolGame>(static_cast<uint16_t>(g_config.getNumber(ConfigManager::GAME_PORT)));
+	if (g_config.getBoolean(ConfigManager::ENABLE_LIVE_CASTING)) {
+		ProtocolGame::clearLiveCastInfo();
+		services->add<ProtocolSpectator>(static_cast<uint16_t>(g_config.getNumber(ConfigManager::LIVE_CAST_PORT)));
+	}
 	services->add<ProtocolLogin>(static_cast<uint16_t>(g_config.getNumber(ConfigManager::LOGIN_PORT)));
 
 	// OT protocols
 	services->add<ProtocolStatus>(static_cast<uint16_t>(g_config.getNumber(ConfigManager::STATUS_PORT)));
+
+	// Legacy login protocol
+	services->add<ProtocolOld>(static_cast<uint16_t>(g_config.getNumber(ConfigManager::LOGIN_PORT)));
+
+	// Site check protocol
+	services->add<ProtocolCheck>(static_cast<uint16_t>(g_config.getNumber(ConfigManager::CHECK_PORT)));
 
 	RentPeriod_t rentPeriod;
 	std::string strRentPeriod = asLowerCaseString(g_config.getString(ConfigManager::HOUSE_RENT_PERIOD));
@@ -306,4 +362,14 @@ void mainLoader(int, char*[], ServiceManager* services)
 	g_game.start(services);
 	g_game.setGameState(GAME_STATE_NORMAL);
 	g_loaderSignal.notify_all();
+
+	std::cout << ">> Server started in " << (OTSYS_TIME(true) - starttime) / (1000.) << " seconds." << std::endl;
 }
+
+#ifndef _WIN32
+__attribute__ ((used)) void saveServer() {
+	std::cout << "Server crash :O" << std::endl;
+	g_game.saveGameState(true);
+	g_game.saveServeMessage();
+}
+#endif

@@ -1,6 +1,6 @@
 /**
  * The Forgotten Server - a free and open-source MMORPG server emulator
- * Copyright (C) 2019  Mark Samman <mark.samman@gmail.com>
+ * Copyright (C) 2019 Mark Samman <mark.samman@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,13 @@ class Database
 		Database& operator=(const Database&) = delete;
 
 		/**
+		 * Connects to the database
+		 *
+		 * @return true on successful connection, false on error
+		 */
+		bool connect();
+
+		/**
 		 * Singleton implementation.
 		 *
 		 * @return database connection handler singleton
@@ -47,13 +54,6 @@ class Database
 			static Database instance;
 			return instance;
 		}
-
-		/**
-		 * Connects to the database
-		 *
-		 * @return true on successful connection, false on error
-		 */
-		bool connect();
 
 		/**
 		 * Executes command.
@@ -117,7 +117,7 @@ class Database
 			return maxPacketSize;
 		}
 
-	private:
+	protected:
 		/**
 		 * Transaction related methods.
 		 *
@@ -209,7 +209,7 @@ class DBInsert
 		bool addRow(std::ostringstream& row);
 		bool execute();
 
-	private:
+	protected:
 		std::string query;
 		std::string values;
 		size_t length;

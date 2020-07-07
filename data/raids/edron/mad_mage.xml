@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <raid>
 	<areaspawn delay="10000" fromx="33311" fromy="31850" fromz="9" tox="33362" toy="31908" toz="9">
 		<monster name="Golden Servant" amount="7"/>

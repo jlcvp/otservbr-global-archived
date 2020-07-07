@@ -10,16 +10,12 @@ on:
     tags:
       - v*
 
-    paths:
-      - cmake/**
-      - src/**
-      - CMakeLists.txt
-
   pull_request:
     paths:
       - cmake/**
       - src/**
       - CMakeLists.txt
+      - .github/**
 
 jobs:
   job:

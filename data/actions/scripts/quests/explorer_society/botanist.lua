@@ -1,17 +1,17 @@
 function onUse(player, item, fromPosition, target, toPosition, isHotkey)
-	if target.itemid == 4138 and player:getStorageValue(Storage.ExplorerSociety.ThePlantCollection) == 17 and player:getStorageValue(Storage.ExplorerSociety.QuestLine) == 17 then
+	if target.itemid == 4138 and player:getStorageValue(Storage.ExplorerSociety.ThePlantCollection) == 17 and player:getStorageValue(Storage.ExplorerSociety.Mission04) == 1 then
 		player:setStorageValue(Storage.ExplorerSociety.ThePlantCollection, 18)
-		player:setStorageValue(Storage.ExplorerSociety.QuestLine, 18)
+		player:setStorageValue(Storage.ExplorerSociety.Mission04, 2)
 		toPosition:sendMagicEffect(CONST_ME_MAGIC_BLUE)
 		item:transform(4870)
-	elseif target.itemid == 4149 and player:getStorageValue(Storage.ExplorerSociety.ThePlantCollection) == 20 and player:getStorageValue(Storage.ExplorerSociety.QuestLine) == 20 then
+	elseif target.itemid == 4149 and player:getStorageValue(Storage.ExplorerSociety.ThePlantCollection) == 20 and player:getStorageValue(Storage.ExplorerSociety.Mission04) == 4 then
 		player:setStorageValue(Storage.ExplorerSociety.ThePlantCollection, 21)
-		player:setStorageValue(Storage.ExplorerSociety.QuestLine, 21)
+		player:setStorageValue(Storage.ExplorerSociety.Mission04, 5)
 		toPosition:sendMagicEffect(CONST_ME_MAGIC_BLUE)
 		item:transform(4871)
-	elseif target.itemid == 4142 and player:getStorageValue(Storage.ExplorerSociety.ThePlantCollection) == 23 and player:getStorageValue(Storage.ExplorerSociety.QuestLine) == 23 then
+	elseif target.itemid == 4142 and player:getStorageValue(Storage.ExplorerSociety.ThePlantCollection) == 23 and player:getStorageValue(Storage.ExplorerSociety.Mission04) == 7 then
 		player:setStorageValue(Storage.ExplorerSociety.ThePlantCollection, 24)
-		player:setStorageValue(Storage.ExplorerSociety.QuestLine, 24)
+		player:setStorageValue(Storage.ExplorerSociety.Mission04, 8)
 		toPosition:sendMagicEffect(CONST_ME_MAGIC_BLUE)
 		item:transform(4872)
 	elseif target.itemid == 5659 and target.uid == 3152 then
