@@ -32,7 +32,7 @@ Several quests working, including dream courts, ferumbras, halls of hope, cults 
 Download in the Code (or clone) button and "Download Zip"
 * [Compatible Gesior](https://forums.otserv.com.br/index.php?/forums/topic/169428-premium-gesior-aac/)
 
-* For download the executables and dll files, goto for the "develop - OK" ok button, slightly above.
+* For download the executables and dll files, goto for the "develop - OK" ok button, slightly above, then go to configuration: release> artifacts> otservbr-global.zip
 
 ## Docs/Help
 [![Documentation](https://codedocs.xyz/Costallat/otservbr-global.svg)](https://codedocs.xyz/Costallat/otservbr-global/)
