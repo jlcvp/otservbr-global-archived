@@ -33,6 +33,7 @@
 #include "movement.h"
 #include "scheduler.h"
 #include "weapons.h"
+#include "iostash.h"
 
 extern ConfigManager g_config;
 extern Game g_game;
@@ -49,9 +50,12 @@ MuteCountMap Player::muteCountMap;
 uint32_t Player::playerAutoID = 0x10010000;
 
 Player::Player(ProtocolGame_ptr p) :
-	Creature(), lastPing(OTSYS_TIME()), lastPong(lastPing), inbox(new Inbox(ITEM_INBOX)), client(std::move(p))
-{
-	inbox->incrementReferenceCounter();
+                                    Creature(),
+                                    lastPing(OTSYS_TIME()),
+                                    lastPong(lastPing),
+                                    inbox(new Inbox(ITEM_INBOX)),
+                                    client(std::move(p)) {
+  inbox->incrementReferenceCounter();
 }
 
 Player::~Player()
@@ -711,7 +715,7 @@ bool Player::canWalkthrough(const Creature* creature) const
 
 	const Player* player = creature->getPlayer();
 	const Monster* monster = creature->getMonster();
-
+	const Npc* npc = creature->getNpc();
 	if (monster) {
 		if (!monster->isPet()) {
 			return false;
@@ -721,7 +725,7 @@ bool Player::canWalkthrough(const Creature* creature) const
 
 	if (player) {
 		const Tile* playerTile = player->getTile();
-		if (!playerTile || (!playerTile->hasFlag(TILESTATE_NOPVPZONE) && !playerTile->hasFlag(TILESTATE_PROTECTIONZONE) && player->getLevel() > static_cast<uint32_t>(g_config.getNumber(ConfigManager::PROTECTION_LEVEL)))) {
+		if (!playerTile || (!playerTile->hasFlag(TILESTATE_NOPVPZONE) && !playerTile->hasFlag(TILESTATE_PROTECTIONZONE) && player->getLevel() > static_cast<uint32_t>(g_config.getNumber(ConfigManager::PROTECTION_LEVEL)) && g_game.getWorldType() != WORLD_TYPE_NO_PVP)) {
 			return false;
 		}
 
@@ -743,10 +747,13 @@ bool Player::canWalkthrough(const Creature* creature) const
 
 		thisPlayer->setLastWalkthroughPosition(creature->getPosition());
 		return true;
-	} else {
-		return false;
+	} else if (npc) {
+		const Tile* tile = npc->getTile();
+		const HouseTile* houseTile = dynamic_cast<const HouseTile*>(tile);
+		return (houseTile != nullptr);
 	}
 
+	return false;
 }
 
 bool Player::canWalkthroughEx(const Creature* creature) const
@@ -764,9 +771,14 @@ bool Player::canWalkthroughEx(const Creature* creature) const
 	}
 
 	const Player* player = creature->getPlayer();
+	const Npc* npc = creature->getNpc();
 	if (player) {
 		const Tile* playerTile = player->getTile();
-		return playerTile && (playerTile->hasFlag(TILESTATE_NOPVPZONE) || playerTile->hasFlag(TILESTATE_PROTECTIONZONE) || player->getLevel() <= static_cast<uint32_t>(g_config.getNumber(ConfigManager::PROTECTION_LEVEL)));
+		return playerTile && (playerTile->hasFlag(TILESTATE_NOPVPZONE) || playerTile->hasFlag(TILESTATE_PROTECTIONZONE) || player->getLevel() <= static_cast<uint32_t>(g_config.getNumber(ConfigManager::PROTECTION_LEVEL)) || g_game.getWorldType() == WORLD_TYPE_NO_PVP);
+	} else if (npc) {
+		const Tile* tile = npc->getTile();
+		const HouseTile* houseTile = dynamic_cast<const HouseTile*>(tile);
+		return (houseTile != nullptr);
 	} else {
 		return false;
 	}
@@ -1982,7 +1994,7 @@ BlockType_t Player::blockHit(Creature* attacker, CombatType_t combatType, int32_
 				if (info >> 8) {
 					Imbuement* ib = g_imbuements->getImbuement(info & 0xFF);
 					const int16_t& absorbPercent2 = ib->absorbPercent[combatTypeToIndex(combatType)];
-					
+
 					if (absorbPercent2 != 0) {
 						damage -= std::ceil(damage * (absorbPercent2 / 100.));
 					}
@@ -4342,7 +4354,7 @@ void Player::sendUnjustifiedPoints()
 
 		auto dayMax = ((isRed ? 2 : 1) * g_config.getNumber(ConfigManager::DAY_KILLS_TO_RED));
 		auto weekMax = ((isRed ? 2 : 1) * g_config.getNumber(ConfigManager::WEEK_KILLS_TO_RED));
-		auto monthMax = ((isRed ? 2 : 1) * g_config.getNumber(ConfigManager::MONTH_KILLS_TO_RED));		
+		auto monthMax = ((isRed ? 2 : 1) * g_config.getNumber(ConfigManager::MONTH_KILLS_TO_RED));
 
 		uint8_t dayProgress = std::min(std::round(dayKills / dayMax * 100), 100.0);
 		uint8_t weekProgress = std::min(std::round(weekKills / weekMax * 100), 100.0);
@@ -4923,4 +4935,123 @@ void Player::onDeEquipImbueItem(Imbuement* imbuement)
 	}
 
 	return;
+}
+
+bool Player::addItemFromStash(uint16_t itemId, uint32_t itemCount) {
+	uint32_t stackCount = 100u;
+
+	while (itemCount > 0) {
+		auto addValue = itemCount > stackCount ? stackCount : itemCount;
+		itemCount -= addValue;
+		Item* newItem = Item::CreateItem(itemId, addValue);
+
+		if (g_game.internalPlayerAddItem(this, newItem, true) != RETURNVALUE_NOERROR) {
+			std::cout << "[Player::addItemFromStash] Could not add itemId: " << itemId << " count: " << addValue << " to playerId: " << this->guid << std::endl;
+			delete newItem;
+			return false;
+		}
+	}
+	return true;
+}
+
+void Player::stowContainer(Item* item, uint32_t count) {
+	if (item == NULL || !isItemStorable(item)) {
+		sendCancelMessage(RETURNVALUE_NOTPOSSIBLE);
+		return;
+	}
+
+	ItemDeque itemList = ItemDeque();
+	std::map<uint16_t, std::pair<bool, uint32_t>> itemDict;	
+	uint32_t totalStowed = 0;
+	std::ostringstream retString;
+  const ItemType& itemType = Item::items[item->getID()];
+
+	if (itemType.isContainer()) {
+		itemList = getAllStorableItemsInContainer(item);
+	}	else {
+		itemList.push_back(item);
+	}
+
+	for (Item* i : itemList) {
+    auto sameItemCountSum = itemType.isContainer() ? i->getItemCount() : count;
+
+		if (itemDict.count(i->getClientID()) == 1) {
+			sameItemCountSum += itemDict[i->getClientID()].second;
+		}
+
+		itemDict[i->getClientID()] = std::pair<bool, uint32_t>(false, sameItemCountSum);
+	}
+
+	itemDict = IOStash::stashContainer(this->guid, itemDict, g_config.getNumber(ConfigManager::STASH_ITEMS));
+
+  if (itemDict.size() == 0) {
+    if(itemList.size() == 0)
+      sendCancelMessage("There is nothing to stash in this container");
+    else if (itemList.size() == 1 && !itemType.isContainer())
+      sendCancelMessage("You don't have capacity in the Supply Stash to store this item");
+    else
+      sendCancelMessage("You don't have capacity in the Supply Stash to store this container");
+    return;
+  }
+
+  if (itemType.isContainer()) {
+    for (auto itemToRemove : itemList) {
+      g_game.internalRemoveItem(itemToRemove, itemToRemove->getItemCount());
+      totalStowed += itemToRemove->getItemCount();
+    }
+  } else {
+    g_game.internalRemoveItem(item, count);
+    totalStowed += count;
+  }
+
+	retString << "Stowed " << totalStowed << " object" << (totalStowed > 1 ? "s." : ".");
+	sendCancelMessage(retString.str());
+}
+
+
+bool Player::isItemStorable(Item* item) {
+	auto isContainerAndHasSomethingInside = item->getContainer() != NULL && item->getContainer()->getItemList().size() > 0;
+	return (item->isStackable() &&
+		item->getID() != ITEM_GOLD_COIN &&
+		item->getID() != ITEM_PLATINUM_COIN &&
+		item->getID() != ITEM_CRYSTAL_COIN) ||
+		isContainerAndHasSomethingInside;
+}
+
+ItemDeque Player::getAllStorableItemsInContainer(Item* container) {
+
+	auto allITems = container->getContainer()->getItemList();
+
+	ItemDeque toReturnList = ItemDeque();
+
+	for (auto item : allITems) {
+		if (item->getContainer() != NULL) {
+			auto subContainer = getAllStorableItemsInContainer(item);
+			for (auto subContItem : subContainer) {
+				toReturnList.push_back(subContItem);
+			}
+		}
+		else if (isItemStorable(item)) {
+			toReturnList.push_back(item);
+		}
+	}
+
+	return toReturnList;
+}
+
+/*******************************************************************************
+ * Interfaces
+ ******************************************************************************/
+
+error_t Player::SetAccountInterface(account::Account* account) {
+	if (account == nullptr) {
+		return account::ERROR_NULLPTR;
+	}
+	account_ = account;
+	return account::ERROR_NO;
+}
+
+error_t Player::GetAccountInterface(account::Account* account) {
+	account = account_;
+	return account::ERROR_NO;
 }
